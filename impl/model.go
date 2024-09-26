@@ -7,11 +7,11 @@ import (
 )
 
 const (
-	HOST     = "localhost"
+	HOST     = "snake_pg"
 	PORT     = "5432"
 	USER     = "postgres"
-	PASSWORD = "WangHao_0714"
-	DBNAME   = "db_for_greedy_snake"
+	PASSWORD = "766515"
+	DBNAME   = "greedy_snake_db"
 )
 
 var db *sql.DB
