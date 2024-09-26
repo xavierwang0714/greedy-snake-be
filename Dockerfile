@@ -1,24 +1,33 @@
-FROM golang:latest
-LABEL authors="Xavier Wang"
-
-# 安装 Go
-RUN yum -y update && yum -y install golang
+# 使用官方的 Go 镜像作为构建阶段
+FROM golang:1.21 AS builder
 
 # 设置工作目录
-WORKDIR /go/src/app
+WORKDIR /var/deploy
 
-# 复制当前目录下的所有文件到工作目录
-COPY . .
+# 将 go.mod 和 go.sum 文件复制到工作目录
+COPY go.mod go.sum ./
 
-# 设置 Go 环境变量
-ENV GOPATH /go
-ENV PATH=$PATH:$GOPATH/bin
-
-# 安装依赖
+# 下载依赖
 RUN go mod download
 
-# 编译
-RUN go build -o main .
+# 将源代码复制到工作目录
+COPY . .
 
-# 运行
-CMD ["./main"]
+# 编译应用程序
+# 使用 CGO_ENABLED=0 和 GOOS=linux 生成静态链接的二进制文件
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o snake .
+
+# 使用一个更小的基础镜像来运行应用程序
+FROM alpine:latest
+
+# 设置工作目录
+WORKDIR /var/deploy
+
+# 从构建阶段复制编译后的二进制文件
+COPY --from=builder /var/deploy .
+
+# 暴露应用程序运行的端口
+EXPOSE 6673
+
+# 运行应用程序
+CMD ["/var/deploy/snake"]

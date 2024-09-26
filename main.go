@@ -1,7 +1,8 @@
 package main
 
 import (
-	"Backend/impl"
+	"snake/impl"
+
 	_ "github.com/lib/pq"
 )
 
